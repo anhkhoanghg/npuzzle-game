@@ -83,7 +83,7 @@ class InterfaceApp:
 
         self.algorithmbox = ttk.Combobox(self.appFrame)
         self.algorithmbox.configure(cursor="hand2", state="readonly",
-                                    values=('BFS', 'DFS', 'A* Manhattan', 'A* Euclidean'))
+                                    values=('BFS', 'DFS', 'Greedy', 'A* Manhattan', 'A* Euclidean'))
         self.algorithmbox.place(anchor="center", height=30, width=150, x=700, y=230)
         self.algorithmbox.bind("<<ComboboxSelected>>", self.selectAlgorithm)
 
@@ -95,8 +95,8 @@ class InterfaceApp:
         self.enterImagebutton = ttk.Button(self.appFrame)
         self.enterImagebutton.configure(
             cursor="hand2", text="Random State", compound="top")
-        self.enterImagebutton.place(anchor="s",height=50 ,width=150, x=700, y=50)
-        self.enterImagebutton.bind("<<ButtonPress>>", self.random_puzzle_state)
+        self.enterImagebutton.place(anchor="n",height=50 ,width=150, x=700, y=50)
+        self.enterImagebutton.bind("<<ButtonPress>>", self.randomStateI)
         
 
         self.analysisbox = ttk.Label(self.appFrame)
@@ -229,24 +229,18 @@ class InterfaceApp:
             messagebox.showerror('Cannot Solve', solvingerror)
         app.gif_loading.place_forget()
         
-    def random_puzzle_state(self, event=None):
-        """_summary_
-        random state of puzzle
-        Args:
-            event (_type_, optional): _description_. Defaults to None.
-        """
-        input_string = '012345678'
-        characters = list(input_string)
-        random.shuffle(characters)
-        shuffled_string = ''.join(characters)
-        
-        global initialState, statepointer
-        if self.validateState(shuffled_string):
-            initialState = shuffled_string
-            self.reset()
-            app.displayStateOnGrid(initialState)
-        
-
+    def randomStateI(self, event=None):
+        global initialState
+        inputState = main.randomState()
+        print(initialState)
+        if inputState is not None:
+            if self.validateState(inputState):
+                initialState = inputState
+                self.reset()
+                app.displayStateOnGrid(initialState)
+            else:
+                messagebox.showerror('Input Error', 'Invalid initial state')
+    
     def enterInitialState(self, event=None):
         """
         Invoked at pressing enter initial state button. Displays a simple dialog box for the user to enter their
@@ -417,6 +411,10 @@ class InterfaceApp:
             main.AStarSearch_euclid(initialState)
             path, cost, counter, depth, runtime = \
                 main.euclid_path, main.euclid_cost, main.euclid_counter, round(main.euclid_depth), round(main.time_euclid, 2)
+        elif str(algorithm) == 'Greedy':
+            main.Greedy(initialState)
+            path, cost, counter, depth, runtime = \
+                main.greedy_path, main.greedy_cost, main.greedy_counter, round(main.greedy_depth), round(main.time_greedy)
 
     def resetGrid(self):
         """
@@ -503,6 +501,6 @@ class InterfaceApp:
 if __name__ == "__main__":
     global app
     root = tk.Tk()
-    root.title('8 Puzzle Game')
+    root.title('8 Puzzles Game')
     app = InterfaceApp(root)
     app.run()

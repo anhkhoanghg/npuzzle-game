@@ -1,36 +1,40 @@
 import heapq
 import math
 import time
+import random
 
-# Used for states generation (getChildren())
 dx = [-1, 1, 0, 0]
 dy = [0, 0, 1, -1]
 
-# Global variables holding algorithms
 dfs_counter = 0
 bfs_counter = 0
 euclid_counter = 0
 manhattan_counter = 0
+greedy_counter = 0
 
 dfs_path = []
 bfs_path = []
 euclid_path = []
 manhattan_path = []
+greedy_path = []
 
 dfs_cost = 0
 bfs_cost = 0
 euclid_cost = 0
 manhattan_cost = 0
+greedy_cost = 0
 
 dfs_depth = 0
 bfs_depth = 0
 euclid_depth = 0
 manhattan_depth = 0
+greedy_depth = 0
 
 time_dfs = 0
 time_bfs = 0
 time_euclid = 0
 time_manhattan = 0
+time_greedy = 0
 
 
 # function to get String representation
@@ -92,6 +96,14 @@ def isSolvable(digit):
                 count += 1
     return count % 2 == 0
 
+def randomState():
+    input_string = '012345678'
+    characters = list(input_string)
+    random.shuffle(characters)
+    shuffled_string = ''.join(characters)
+    return shuffled_string
+
+
 
 # breadth first search algorithm
 def BFS(inputState):
@@ -102,7 +114,7 @@ def BFS(inputState):
     parent = {}
     parent_cost = {}
     integer_state = int(inputState)
-    q.append(integer_state)  # here you place the input
+    q.append(integer_state)
     cnt = 0
     global bfs_counter
     global bfs_path
@@ -338,6 +350,56 @@ def AStarSearch_euclid(inputState):
 
     return 0
 
+def Greedy(inputState):
+    start_time = time.time()
+    integer_state = int(inputState)
+    heap = []
+    explored = {}
+    parent = {}
+    heapq.heappush(heap, (getEuclideanDistance(inputState), integer_state))
+    global greedy_counter
+    global greedy_path
+    global greedy_cost
+    global greedy_depth
+    global time_greedy
+    greedy_depth = 0
+
+    while heap:
+        node = heapq.heappop(heap)
+        state = node[1]
+        string_state = getStringRepresentation(state)
+
+        if not state in explored:
+            greedy_depth += 1
+
+        explored[state] = 1
+
+        if goalTest(state):
+            path = getPath(parent, int(inputState))
+            greedy_path = path
+            greedy_counter = len(explored)
+            greedy_cost = len(path) - 1
+            time_greedy = float(time.time() - start_time)
+            return 1
+
+        # Generate children
+        children = getChildren(string_state)
+        for child in children:
+            new_cost = getEuclideanDistance(child)
+            child_int = int(child)
+            if child_int not in explored:
+                heapq.heappush(heap, (new_cost, child_int))
+                parent[child_int] = state
+
+    # If no solution is found
+    greedy_cost = 0
+    greedy_path = []
+    greedy_counter = len(explored)
+    time_greedy = float(time.time() - start_time)
+    return 0
+    
+    
+
 # start_time=time.time()
 # for i in range(0,10000):
 #     print(1)
@@ -354,3 +416,6 @@ def AStarSearch_euclid(inputState):
 
 
 # unsolvable 103245678, 702853641
+
+
+
